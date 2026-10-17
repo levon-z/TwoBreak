@@ -10,7 +10,7 @@ The missing page is made of little squares, and you get to break it. Three games
 
 Catch the **×3** blocks for more balls (or more bullets). It plays itself until you take over.
 
-**Controls:** mouse or ← → / A D on a laptop, drag your finger on a phone.
+**Controls:** ← → (or A / D) on a PC or laptop, drag your finger on a phone.
 
 ▶ **Play it:** [levon-z.github.io/TwoBreak](https://levon-z.github.io/TwoBreak/), or on any page that doesn't exist on [twocode.nl](https://twocode.nl/robo-was-here/).
 

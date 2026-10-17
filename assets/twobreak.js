@@ -1,6 +1,6 @@
 /* Project 03 · TwoBreak: the missing page is made of little squares, and you get to break it.
    Three games: breakout through "404", breakout through "ERROR" (Robo is the O), or shoot a marching 404 apart.
-   It plays itself until you move your mouse (or drag a finger) over it; then you take over.
+   It plays itself until you press an arrow key (or drag a finger on a phone); then you take over.
    Used on /play/ and on every 404 page of the site. */
 (function () {
   'use strict';
@@ -139,7 +139,7 @@
 
     function step() {
       tick++;
-      // arrow keys (or A / D) steer, just like the mouse
+      // arrow keys (or A / D) steer, just like a finger on a phone
       var steer = (keys.arrowright || keys.d ? 1 : 0) - (keys.arrowleft || keys.a ? 1 : 0);
       if (steer) { pointerX = (game === '404-invaders' ? ship : pad).x + steer * 40; lastUser = performance.now(); }
       var m = march(), user = userPlays(), target = user ? pointerX : aiTarget();
@@ -250,18 +250,22 @@
     function go() { if (!raf && running && visible) { prev = performance.now(); raf = requestAnimationFrame(loop); } }
 
     function toLogical(e) { var r = cv.getBoundingClientRect(); return (e.clientX - r.left) / r.width * W; }
-    function take(e) { pointerX = toLogical(e); lastUser = performance.now(); if (!running) { running = true; go(); } }
+    // on a phone you drag with your finger; with a mouse the arrow keys steer (hovering does nothing)
+    function take(e) { if (e.pointerType === 'mouse') return; pointerX = toLogical(e); lastUser = performance.now(); if (!running) { running = true; go(); } }
     cv.addEventListener('pointermove', take);
-    cv.addEventListener('pointerdown', function (e) { take(e); if (cv.setPointerCapture) cv.setPointerCapture(e.pointerId); });
-    // keys work when the game has focus, or when it fills the middle of the screen and you are not typing somewhere
+    cv.addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse') { cv.focus(); return; } take(e); if (cv.setPointerCapture) cv.setPointerCapture(e.pointerId); });
+    // the arrow keys (or A / D) work whenever the game is on screen and you are not typing somewhere
     var KEYS = { arrowleft: 1, arrowright: 1, a: 1, d: 1 };
-    function inView() { var r = box.getBoundingClientRect(); return r.top < innerHeight * 0.6 && r.bottom > innerHeight * 0.4; }
+    function inView() { var r = box.getBoundingClientRect(); return r.bottom > 40 && r.top < innerHeight - 40; }
     window.addEventListener('keydown', function (e) {
       var k = (e.key || '').toLowerCase(), t = e.target;
       if (!KEYS[k] || e.ctrlKey || e.metaKey || e.altKey) return;
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       if (document.activeElement !== cv && !inView()) return;
       e.preventDefault(); keys[k] = true; lastUser = performance.now();
+      if (pointerX == null) pointerX = (game === '404-invaders' ? ship : pad).x;
+      // the first key press brings the whole game into view, so you can see what you steer
+      var rb = box.getBoundingClientRect(); if (rb.top < 0 || rb.bottom > innerHeight) box.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
       if (!running) { running = true; go(); }
     });
     window.addEventListener('keyup', function (e) { delete keys[(e.key || '').toLowerCase()]; });
